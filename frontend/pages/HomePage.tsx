@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, MapPin, Grid3X3, TrendingUp } from 'lucide-react';
+import { Search, MapPin, Grid3X3, TrendingUp, Heart, Plus } from 'lucide-react';
 import backend from '~backend/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,14 +13,18 @@ import GalleryMap from '../components/GalleryMap';
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [view, setView] = useState<'listings' | 'galleries' | 'categories'>('listings');
+  const [view, setView] = useState<'offerings' | 'wanted' | 'galleries' | 'categories'>('offerings');
 
   const { data: listings, isLoading: loadingListings } = useQuery({
-    queryKey: ['listings', searchQuery, selectedCategory],
+    queryKey: ['listings', searchQuery, selectedCategory, view],
     queryFn: async () => {
+      if (view === 'galleries' || view === 'categories') return { listings: [], total: 0 };
+      
+      const listingType = view === 'wanted' ? 'wanted' : 'offering';
       const response = await backend.listing.listListings({
         search: searchQuery || undefined,
         category_id: selectedCategory || undefined,
+        listing_type: listingType,
         limit: 20
       });
       return response;
@@ -46,10 +50,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">
-          GetPaid Connect
+          NzimApp
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Your Market. Your Network. Your Income. Discover local sellers, earn by sharing, and connect with your community.
+          Digital Gallery Marketplace for Burundi. Connect, Share, Earn. Your Market. Your Network. Your Income.
         </p>
       </div>
 
@@ -72,14 +76,22 @@ export default function HomePage() {
       </Card>
 
       {/* View Toggle */}
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-2 justify-center flex-wrap">
         <Button
-          variant={view === 'listings' ? 'default' : 'outline'}
-          onClick={() => setView('listings')}
+          variant={view === 'offerings' ? 'default' : 'outline'}
+          onClick={() => setView('offerings')}
           className="flex items-center gap-2"
         >
           <TrendingUp className="h-4 w-4" />
-          Listings
+          Offerings
+        </Button>
+        <Button
+          variant={view === 'wanted' ? 'default' : 'outline'}
+          onClick={() => setView('wanted')}
+          className="flex items-center gap-2"
+        >
+          <Heart className="h-4 w-4" />
+          Wanted
         </Button>
         <Button
           variant={view === 'categories' ? 'default' : 'outline'}
@@ -100,7 +112,7 @@ export default function HomePage() {
       </div>
 
       {/* Category Filter */}
-      {view === 'listings' && categories && (
+      {(view === 'offerings' || view === 'wanted') && categories && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
@@ -124,7 +136,7 @@ export default function HomePage() {
       )}
 
       {/* Content */}
-      {view === 'listings' && (
+      {(view === 'offerings' || view === 'wanted') && (
         <div>
           {loadingListings ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -141,7 +153,19 @@ export default function HomePage() {
           ) : listings?.listings.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <p className="text-gray-500">No listings found. Try adjusting your search or filters.</p>
+                <div className="space-y-4">
+                  {view === 'wanted' ? (
+                    <>
+                      <Heart className="h-12 w-12 mx-auto text-gray-400" />
+                      <p className="text-gray-500">No wanted listings found. Be the first to post what you're looking for!</p>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-12 w-12 mx-auto text-gray-400" />
+                      <p className="text-gray-500">No offerings found. Try adjusting your search or filters.</p>
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -159,7 +183,7 @@ export default function HomePage() {
           categories={categories.categories} 
           onCategorySelect={(categoryId) => {
             setSelectedCategory(categoryId);
-            setView('listings');
+            setView('offerings');
           }}
         />
       )}

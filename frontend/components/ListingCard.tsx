@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Share2 } from 'lucide-react';
+import { MapPin, Star, Share2, Heart, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
+  const isWanted = listing.listing_type === 'wanted';
+  
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <Link to={`/listing/${listing.id}`}>
@@ -22,7 +24,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
             />
           ) : (
             <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-              <span className="text-gray-400">No image</span>
+              {isWanted ? (
+                <Heart className="h-12 w-12 text-gray-400" />
+              ) : (
+                <span className="text-gray-400">No image</span>
+              )}
             </div>
           )}
         </CardContent>
@@ -36,21 +42,36 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 {listing.title}
               </h3>
             </Link>
-            {listing.is_boosted && (
-              <Badge variant="default" className="ml-2">
-                <Star className="h-3 w-3 mr-1" />
-                Boosted
-              </Badge>
-            )}
+            <div className="flex gap-1 ml-2">
+              {listing.is_boosted && (
+                <Badge variant="default">
+                  <Star className="h-3 w-3 mr-1" />
+                  Boosted
+                </Badge>
+              )}
+              {isWanted && (
+                <Badge variant="secondary" className="bg-red-100 text-red-700">
+                  <Heart className="h-3 w-3 mr-1" />
+                  Wanted
+                </Badge>
+              )}
+            </div>
           </div>
           
           <div className="text-xl font-bold text-green-600">
-            {listing.price.toLocaleString()} {listing.currency}
+            {isWanted ? 'Looking for' : `${listing.price.toLocaleString()} ${listing.currency}`}
           </div>
           
-          {listing.category && (
-            <Badge variant="secondary">{listing.category.name}</Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {listing.category && (
+              <Badge variant="secondary">{listing.category.name}</Badge>
+            )}
+            {listing.trust_score > 0 && (
+              <Badge variant="outline" className="text-xs">
+                Trust: {listing.trust_score}
+              </Badge>
+            )}
+          </div>
         </div>
         
         <div className="space-y-2">
@@ -62,15 +83,18 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <div className="flex gap-2">
             <Link to={`/listing/${listing.id}`} className="flex-1">
               <Button variant="outline" size="sm" className="w-full">
+                <Eye className="h-3 w-3 mr-1" />
                 View Details
               </Button>
             </Link>
-            <Link to={`/share/${listing.id}`}>
-              <Button size="sm" className="flex items-center gap-1">
-                <Share2 className="h-3 w-3" />
-                Share & Earn
-              </Button>
-            </Link>
+            {!isWanted && (
+              <Link to={`/share/${listing.id}`}>
+                <Button size="sm" className="flex items-center gap-1">
+                  <Share2 className="h-3 w-3" />
+                  Share & Earn
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </CardHeader>

@@ -12,26 +12,26 @@ interface ConfirmSaleRequest {
 
 interface ConfirmSaleResponse {
   sale_id: number;
-  commission_earned?: number;
+  gifts_points_earned?: number;
 }
 
-// Confirms a sale and processes referral commission.
+// Confirms a sale and processes referral gifts points.
 export const confirmSale = api<ConfirmSaleRequest, ConfirmSaleResponse>(
   { expose: true, method: "POST", path: "/sales/confirm" },
   async (req) => {
     let referralId: number | null = null;
-    let commissionEarned: number | undefined;
+    let giftsPointsEarned: number | undefined;
     
     if (req.referral_code) {
-      const referral = await referralDB.queryRow<{ id: number; commission_amount: number }>`
-        SELECT id, commission_amount 
+      const referral = await referralDB.queryRow<{ id: number; gifts_points_earned: number }>`
+        SELECT id, gifts_points_earned 
         FROM referrals 
         WHERE referral_code = ${req.referral_code} AND listing_id = ${req.listing_id}
       `;
       
       if (referral) {
         referralId = referral.id;
-        commissionEarned = referral.commission_amount;
+        giftsPointsEarned = referral.gifts_points_earned;
         
         await referralDB.exec`
           UPDATE referrals 
@@ -49,7 +49,7 @@ export const confirmSale = api<ConfirmSaleRequest, ConfirmSaleResponse>(
     
     return {
       sale_id: saleResult!.id,
-      commission_earned: commissionEarned
+      gifts_points_earned: giftsPointsEarned
     };
   }
 );

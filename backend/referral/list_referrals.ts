@@ -15,8 +15,8 @@ interface ReferralWithListing {
   referral_code: string;
   clicks: number;
   is_sale_confirmed: boolean;
-  commission_amount: number;
-  commission_paid: boolean;
+  gifts_points_earned: number;
+  gifts_points_paid: boolean;
   created_at: Date;
   confirmed_at?: Date;
 }

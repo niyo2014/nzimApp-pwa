@@ -19,8 +19,8 @@ export const createReferral = api<CreateReferralRequest, CreateReferralResponse>
     const referralCode = generateReferralCode();
     
     await referralDB.exec`
-      INSERT INTO referrals (listing_id, sharer_name, sharer_phone, referral_code, commission_amount)
-      VALUES (${req.listing_id}, ${req.sharer_name}, ${req.sharer_phone}, ${referralCode}, 1000)
+      INSERT INTO referrals (listing_id, sharer_name, sharer_phone, referral_code, gifts_points_earned)
+      VALUES (${req.listing_id}, ${req.sharer_name}, ${req.sharer_phone}, ${referralCode}, 100)
     `;
     
     const listing = await referralDB.queryRow<any>`
@@ -31,7 +31,7 @@ export const createReferral = api<CreateReferralRequest, CreateReferralResponse>
     `;
     
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://getpaidconnect.com' 
+      ? 'https://getpaid.bi' 
       : 'http://localhost:3000';
     
     const referralUrl = `${baseUrl}/listing/${req.listing_id}?ref=${referralCode}`;

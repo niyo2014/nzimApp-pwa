@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ArrowLeft, Share2, Copy, MessageCircle, DollarSign } from 'lucide-react';
+import { ArrowLeft, Share2, Copy, MessageCircle, Gift } from 'lucide-react';
 import backend from '~backend/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +40,7 @@ export default function SharePage() {
       setReferralLink(data.whatsapp_link);
       toast({
         title: "Referral link created!",
-        description: "You can now share this link and earn commissions."
+        description: "You can now share this link and earn gifts points."
       });
     },
     onError: (error) => {
@@ -100,8 +100,8 @@ export default function SharePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              Earn by Sharing
+              <Gift className="h-5 w-5 text-green-600" />
+              Earn Gifts Points by Sharing
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -109,9 +109,9 @@ export default function SharePage() {
               <h4 className="font-semibold text-green-800 mb-2">How it works:</h4>
               <ul className="text-sm text-green-700 space-y-1">
                 <li>• Share this listing with your network</li>
-                <li>• When someone buys through your link, you earn 1,000 BIF commission</li>
+                <li>• When someone buys through your link, you earn 100 gifts points</li>
                 <li>• Track your earnings in the referral dashboard</li>
-                <li>• Get paid when sales are confirmed</li>
+                <li>• Build your trust score with successful referrals</li>
               </ul>
             </div>
 

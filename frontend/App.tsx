@@ -6,6 +6,9 @@ import ListingPage from './pages/ListingPage';
 import GalleryPage from './pages/GalleryPage';
 import SharePage from './pages/SharePage';
 import ReferralDashboard from './pages/ReferralDashboard';
+import WantedPage from './pages/WantedPage';
+import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
 import Navigation from './components/Navigation';
 
 const queryClient = new QueryClient();
@@ -23,6 +26,9 @@ export default function App() {
               <Route path="/gallery/:id" element={<GalleryPage />} />
               <Route path="/share/:listingId" element={<SharePage />} />
               <Route path="/referrals" element={<ReferralDashboard />} />
+              <Route path="/wanted" element={<WantedPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/dashboard" element={<UserDashboard />} />
             </Routes>
           </main>
           <Toaster />

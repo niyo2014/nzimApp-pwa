@@ -8,6 +8,7 @@ interface ListListingsParams {
   gallery_id?: Query<number>;
   shop_id?: Query<number>;
   search?: Query<string>;
+  listing_type?: Query<'offering' | 'wanted'>;
   limit?: Query<number>;
   offset?: Query<number>;
 }
@@ -23,8 +24,9 @@ export const listListings = api<ListListingsParams, ListListingsResponse>(
   async (params) => {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
+    const listingType = params.listing_type || 'offering';
     
-    let whereConditions = ["l.is_active = true"];
+    let whereConditions = ["l.is_active = true", `l.listing_type = '${listingType}'`];
     let queryParams: any[] = [];
     let paramIndex = 1;
     
@@ -54,7 +56,7 @@ export const listListings = api<ListListingsParams, ListListingsResponse>(
     
     const whereClause = whereConditions.join(" AND ");
     
-    const listings = await listingDB.rawQueryAll<ListingWithDetails>(`
+    const listings = await listingDB.rawQueryAll<any>(`
       SELECT 
         l.*,
         s.shop_number, s.name as shop_name, s.description as shop_description,
@@ -67,7 +69,7 @@ export const listListings = api<ListListingsParams, ListListingsResponse>(
       JOIN galleries g ON s.gallery_id = g.id
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE ${whereClause}
-      ORDER BY l.is_boosted DESC, l.created_at DESC
+      ORDER BY l.is_boosted DESC, l.trust_score DESC, l.created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `, ...queryParams, limit, offset);
     
@@ -78,8 +80,23 @@ export const listListings = api<ListListingsParams, ListListingsResponse>(
       WHERE ${whereClause}
     `, ...queryParams);
     
-    const formattedListings = listings.map(listing => ({
-      ...listing,
+    const formattedListings: ListingWithDetails[] = listings.map(listing => ({
+      id: listing.id,
+      shop_id: listing.shop_id,
+      category_id: listing.category_id,
+      title: listing.title,
+      description: listing.description,
+      price: listing.price,
+      currency: listing.currency,
+      images: listing.images || [],
+      is_active: listing.is_active,
+      is_boosted: listing.is_boosted,
+      boost_expires_at: listing.boost_expires_at,
+      listing_type: listing.listing_type,
+      contact_hidden: listing.contact_hidden,
+      trust_score: listing.trust_score,
+      created_at: listing.created_at,
+      updated_at: listing.updated_at,
       shop: {
         id: listing.shop_id,
         gallery_id: listing.gallery_id,

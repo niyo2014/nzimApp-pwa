@@ -30,7 +30,22 @@ export const getListing = api<GetListingParams, ListingWithDetails>(
     }
     
     return {
-      ...listing,
+      id: listing.id,
+      shop_id: listing.shop_id,
+      category_id: listing.category_id,
+      title: listing.title,
+      description: listing.description,
+      price: listing.price,
+      currency: listing.currency,
+      images: listing.images || [],
+      is_active: listing.is_active,
+      is_boosted: listing.is_boosted,
+      boost_expires_at: listing.boost_expires_at,
+      listing_type: listing.listing_type,
+      contact_hidden: listing.contact_hidden,
+      trust_score: listing.trust_score,
+      created_at: listing.created_at,
+      updated_at: listing.updated_at,
       shop: {
         id: listing.shop_id,
         gallery_id: listing.gallery_id,
@@ -51,7 +66,7 @@ export const getListing = api<GetListingParams, ListingWithDetails>(
         created_at: new Date()
       },
       category: listing.category_name ? {
-        id: listing.category_id,
+        id: listing.category_id!,
         name: listing.category_name,
         name_kirundi: listing.category_name_kirundi,
         name_french: listing.category_name_french,

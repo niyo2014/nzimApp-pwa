@@ -43,6 +43,9 @@ export interface Listing {
   boost_expires_at?: Date;
   created_at: Date;
   updated_at: Date;
+  listing_type: 'offering' | 'wanted';
+  contact_hidden: boolean;
+  trust_score: number;
 }
 
 export interface Referral {
@@ -53,8 +56,8 @@ export interface Referral {
   referral_code: string;
   clicks: number;
   is_sale_confirmed: boolean;
-  commission_amount: number;
-  commission_paid: boolean;
+  gifts_points_earned: number;
+  gifts_points_paid: boolean;
   created_at: Date;
   confirmed_at?: Date;
 }
@@ -76,4 +79,51 @@ export interface ListingWithDetails extends Listing {
   shop: Shop;
   gallery: Gallery;
   category?: Category;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  user_type: 'admin' | 'reseller' | 'vendor' | 'buyer' | 'sharer';
+  trust_score: number;
+  gifts_points: number;
+  created_at: Date;
+}
+
+export interface AdPlan {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  duration_days: number;
+  max_images: number;
+  is_boosted: boolean;
+  geographic_scope: 'gallery' | 'city' | 'country';
+  created_at: Date;
+}
+
+export interface Subscription {
+  id: number;
+  reseller_id: number;
+  plan_id: number;
+  gallery_id?: number;
+  city?: string;
+  country?: string;
+  start_date: Date;
+  end_date: Date;
+  is_active: boolean;
+  created_at: Date;
+}
+
+export interface WantedMatch {
+  id: number;
+  wanted_listing_id: number;
+  offering_listing_id: number;
+  buyer_id: number;
+  vendor_id: number;
+  is_contact_revealed: boolean;
+  reveal_fee_paid: boolean;
+  created_at: Date;
 }

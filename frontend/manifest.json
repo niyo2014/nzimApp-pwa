@@ -1,7 +1,7 @@
 {
-  "name": "GetPaid Connect",
-  "short_name": "GetPaid",
-  "description": "Your Market. Your Network. Your Income. Digital marketplace for Burundi and East Africa.",
+  "name": "NzimApp - Digital Gallery Marketplace",
+  "short_name": "NzimApp",
+  "description": "Digital Gallery Marketplace for Burundi. Connect, Share, Earn. Your Market. Your Network. Your Income.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -21,7 +21,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["shopping", "business", "social"],
+  "categories": ["shopping", "business", "social", "marketplace"],
   "lang": "en",
   "dir": "ltr"
 }
