@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import HomePage from './pages/HomePage';
 import ListingPage from './pages/ListingPage';
+import CreateListingPage from './pages/CreateListingPage';
 import GalleryPage from './pages/GalleryPage';
 import SharePage from './pages/SharePage';
 import ReferralDashboard from './pages/ReferralDashboard';
@@ -23,6 +24,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/listing/:id" element={<ListingPage />} />
+              <Route path="/create" element={<CreateListingPage />} />
               <Route path="/gallery/:id" element={<GalleryPage />} />
               <Route path="/share/:listingId" element={<SharePage />} />
               <Route path="/referrals" element={<ReferralDashboard />} />

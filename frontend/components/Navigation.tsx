@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, MapPin, TrendingUp, Heart, Settings, Menu } from 'lucide-react';
+import { Home, Search, MapPin, TrendingUp, Heart, Settings, Menu, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -43,6 +43,13 @@ export default function Navigation() {
                   </Link>
                 );
               })}
+              
+              <Link to="/create">
+                <Button className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Create
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -58,37 +65,52 @@ export default function Navigation() {
             <span className="font-bold text-lg">NzimApp</span>
           </Link>
           
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Menu className="h-5 w-5" />
+          <div className="flex items-center gap-2">
+            <Link to="/create">
+              <Button size="sm">
+                <Plus className="h-4 w-4" />
               </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <div className="flex flex-col gap-4 mt-8">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link key={item.path} to={item.path}>
-                      <Button
-                        variant={isActive(item.path) ? 'default' : 'ghost'}
-                        className="w-full justify-start gap-2"
-                      >
-                        <Icon className="h-4 w-4" />
-                        {item.label}
-                      </Button>
-                    </Link>
-                  );
-                })}
-              </div>
-            </SheetContent>
-          </Sheet>
+            </Link>
+            
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <div className="flex flex-col gap-4 mt-8">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link key={item.path} to={item.path}>
+                        <Button
+                          variant={isActive(item.path) ? 'default' : 'ghost'}
+                          className="w-full justify-start gap-2"
+                        >
+                          <Icon className="h-4 w-4" />
+                          {item.label}
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                  
+                  <Link to="/create">
+                    <Button className="w-full justify-start gap-2">
+                      <Plus className="h-4 w-4" />
+                      Create Listing
+                    </Button>
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </nav>
 
       {/* Bottom Navigation for Mobile */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-5 h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -104,6 +126,14 @@ export default function Navigation() {
               </Link>
             );
           })}
+          
+          <Link
+            to="/create"
+            className="flex flex-col items-center justify-center gap-1 text-blue-600"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="text-xs">Create</span>
+          </Link>
         </div>
       </div>
     </>

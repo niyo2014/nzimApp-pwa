@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Search, MapPin, Grid3X3, TrendingUp, Heart, Plus } from 'lucide-react';
 import backend from '~backend/client';
 import { Input } from '@/components/ui/input';
@@ -53,8 +54,24 @@ export default function HomePage() {
           NzimApp
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Digital Gallery Marketplace for Burundi. Connect, Share, Earn. Your Market. Your Network. Your Income.
+          Digital Gallery Marketplace for Burundi. Connect. Share. Earn. Your Market. Your Network. Your Income.
         </p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex gap-2 justify-center">
+        <Link to="/create">
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create Listing
+          </Button>
+        </Link>
+        <Link to="/wanted">
+          <Button variant="outline" className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            Post Wanted
+          </Button>
+        </Link>
       </div>
 
       {/* Search Bar */}
@@ -158,11 +175,23 @@ export default function HomePage() {
                     <>
                       <Heart className="h-12 w-12 mx-auto text-gray-400" />
                       <p className="text-gray-500">No wanted listings found. Be the first to post what you're looking for!</p>
+                      <Link to="/create">
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Post Wanted Listing
+                        </Button>
+                      </Link>
                     </>
                   ) : (
                     <>
                       <Plus className="h-12 w-12 mx-auto text-gray-400" />
                       <p className="text-gray-500">No offerings found. Try adjusting your search or filters.</p>
+                      <Link to="/create">
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Listing
+                        </Button>
+                      </Link>
                     </>
                   )}
                 </div>
@@ -193,22 +222,24 @@ export default function HomePage() {
           <GalleryMap galleries={galleries.galleries} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {galleries.galleries.map((gallery) => (
-              <Card key={gallery.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-blue-600" />
-                    {gallery.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Badge variant="secondary">{gallery.zone}</Badge>
-                    {gallery.description && (
-                      <p className="text-sm text-gray-600">{gallery.description}</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <Link key={gallery.id} to={`/gallery/${gallery.id}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-blue-600" />
+                      {gallery.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <Badge variant="secondary">{gallery.zone}</Badge>
+                      {gallery.description && (
+                        <p className="text-sm text-gray-600">{gallery.description}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
