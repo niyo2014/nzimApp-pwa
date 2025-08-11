@@ -1,0 +1,1 @@
+{"id": "getpaid-connect-pwa-tth2", "lang": "typescript"}
