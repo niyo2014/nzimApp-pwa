@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Share2, Heart, Eye } from 'lucide-react';
+import { MapPin, Star, Share2, Heart, Eye, Clock, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,29 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   const isWanted = listing.listing_type === 'wanted';
+  const isGalleryVendor = listing.vendor.vendor_type === 'gallery';
+  
+  const getStatusIcon = () => {
+    switch (listing.status) {
+      case 'reserved':
+        return <Clock className="h-3 w-3" />;
+      case 'completed':
+        return <CheckCircle className="h-3 w-3" />;
+      default:
+        return null;
+    }
+  };
+  
+  const getStatusColor = () => {
+    switch (listing.status) {
+      case 'reserved':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'completed':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-blue-100 text-blue-700';
+    }
+  };
   
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -42,7 +65,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 {listing.title}
               </h3>
             </Link>
-            <div className="flex gap-1 ml-2">
+            <div className="flex gap-1 ml-2 flex-wrap">
               {listing.is_boosted && (
                 <Badge variant="default">
                   <Star className="h-3 w-3 mr-1" />
@@ -55,6 +78,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
                   Wanted
                 </Badge>
               )}
+              {listing.status !== 'active' && (
+                <Badge variant="secondary" className={getStatusColor()}>
+                  {getStatusIcon()}
+                  <span className="ml-1 capitalize">{listing.status}</span>
+                </Badge>
+              )}
             </div>
           </div>
           
@@ -62,7 +91,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             {isWanted ? 'Looking for' : `${listing.price.toLocaleString()} ${listing.currency}`}
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {listing.category && (
               <Badge variant="secondary">{listing.category.name}</Badge>
             )}
@@ -71,13 +100,30 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 Trust: {listing.trust_score}
               </Badge>
             )}
+            <Badge variant="outline" className="text-xs">
+              {isGalleryVendor ? 'Gallery' : 'Delivery'}
+            </Badge>
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <MapPin className="h-4 w-4" />
-            <span>{listing.shop.name} • {listing.gallery.zone}</span>
+            <span>
+              {isGalleryVendor && listing.gallery_data 
+                ? `${listing.gallery_data.gallery_name} • Shop ${listing.gallery_data.shop_number}`
+                : listing.outside_data?.service_area_coverage || 'Service Area'
+              }
+            </span>
+          </div>
+          
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">Vendor:</span> {listing.vendor.name}
+            {listing.vendor.trust_score > 0 && (
+              <span className="ml-2 text-xs">
+                (Trust Score: {listing.vendor.trust_score})
+              </span>
+            )}
           </div>
           
           <div className="flex gap-2">
@@ -87,7 +133,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 View Details
               </Button>
             </Link>
-            {!isWanted && (
+            {!isWanted && listing.status === 'active' && (
               <Link to={`/share/${listing.id}`}>
                 <Button size="sm" className="flex items-center gap-1">
                   <Share2 className="h-3 w-3" />

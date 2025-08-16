@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ArrowLeft, Share2, MessageCircle, MapPin, Phone, Star, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Share2, MessageCircle, MapPin, Phone, Star, Edit, Trash2, Calendar, Truck } from 'lucide-react';
 import backend from '~backend/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +33,6 @@ export default function ListingPage() {
         title: "Listing deleted",
         description: "The listing has been successfully deleted."
       });
-      // Navigate back to home or listings page
       window.history.back();
     },
     onError: (error) => {
@@ -56,7 +55,7 @@ export default function ListingPage() {
   const handleWhatsAppContact = () => {
     if (!listing) return;
     
-    const phone = listing.shop.whatsapp || listing.shop.phone;
+    const phone = listing.vendor.contact_number;
     const message = `Hi! I'm interested in: ${listing.title}`;
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -83,6 +82,22 @@ export default function ListingPage() {
     if (window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
       deleteMutation.mutate();
     }
+  };
+
+  const handleReservePickup = () => {
+    // Navigate to reservation form
+    toast({
+      title: "Reservation",
+      description: "Reservation feature coming soon!"
+    });
+  };
+
+  const handleBuyNow = () => {
+    // Navigate to order form
+    toast({
+      title: "Order",
+      description: "Order feature coming soon!"
+    });
   };
 
   if (isLoading) {
@@ -114,6 +129,7 @@ export default function ListingPage() {
   }
 
   const isWanted = listing.listing_type === 'wanted';
+  const isGalleryVendor = listing.vendor.vendor_type === 'gallery';
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -142,7 +158,6 @@ export default function ListingPage() {
             </Link>
           )}
           
-          {/* Edit and Delete buttons - in a real app, you'd check if user owns this listing */}
           <Button variant="outline" size="sm">
             <Edit className="h-4 w-4 mr-2" />
             Edit
@@ -207,6 +222,11 @@ export default function ListingPage() {
                         Wanted
                       </Badge>
                     )}
+                    {listing.status !== 'active' && (
+                      <Badge variant="outline" className="capitalize">
+                        {listing.status}
+                      </Badge>
+                    )}
                   </div>
                   {listing.category && (
                     <Badge variant="secondary">{listing.category.name}</Badge>
@@ -243,52 +263,89 @@ export default function ListingPage() {
           </Card>
         </div>
 
-        {/* Shop Info */}
+        {/* Vendor Info */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>
-                {isWanted ? 'Buyer Information' : 'Shop Information'}
+                {isWanted ? 'Buyer Information' : 'Vendor Information'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold">{listing.shop.name}</h4>
-                <p className="text-sm text-gray-600">Shop #{listing.shop.shop_number}</p>
+                <h4 className="font-semibold">{listing.vendor.name}</h4>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Badge variant="outline" className="capitalize">
+                    {listing.vendor.vendor_type} Vendor
+                  </Badge>
+                  <Badge variant="outline">
+                    KYC: {listing.vendor.kyc_status}
+                  </Badge>
+                </div>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin className="h-4 w-4" />
-                <span>{listing.gallery.name}, {listing.gallery.zone}</span>
+                <span>
+                  {isGalleryVendor && listing.gallery_data 
+                    ? `${listing.gallery_data.gallery_name} • Shop ${listing.gallery_data.shop_number}`
+                    : listing.outside_data?.service_area_coverage || 'Service Area'
+                  }
+                </span>
               </div>
 
               <div>
-                <p className="text-sm font-medium">
-                  {isWanted ? 'Contact' : 'Owner'}: {listing.shop.owner_name}
-                </p>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Phone className="h-4 w-4" />
-                  <span>{listing.shop.phone}</span>
+                  <span>{listing.vendor.contact_number}</span>
                 </div>
-                {listing.shop.whatsapp && (
+                {listing.vendor.email && (
                   <p className="text-xs text-gray-500 mt-1">
-                    WhatsApp: {listing.shop.whatsapp}
+                    Email: {listing.vendor.email}
                   </p>
                 )}
               </div>
 
-              {listing.shop.description && (
-                <p className="text-sm text-gray-600">{listing.shop.description}</p>
+              {listing.vendor.trust_score > 0 && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded">
+                  <p className="text-sm text-green-800">
+                    <strong>Trust Score:</strong> {listing.vendor.trust_score}/100
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    This vendor has a good reputation on the platform
+                  </p>
+                </div>
               )}
 
-              {!listing.contact_hidden && (
-                <Button 
-                  onClick={handleWhatsAppContact}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Contact via WhatsApp
-                </Button>
+              {!listing.contact_hidden && listing.status === 'active' && (
+                <div className="space-y-2">
+                  {isGalleryVendor ? (
+                    <Button 
+                      onClick={handleReservePickup}
+                      className="w-full"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Reserve & Pickup
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleBuyNow}
+                      className="w-full"
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      Buy Now (Delivery)
+                    </Button>
+                  )}
+                  
+                  <Button 
+                    onClick={handleWhatsAppContact}
+                    variant="outline"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Contact via WhatsApp
+                  </Button>
+                </div>
               )}
 
               {listing.contact_hidden && (
@@ -299,6 +356,14 @@ export default function ListingPage() {
                   <Button size="sm" className="mt-2 w-full">
                     Reveal Contact (500 BIF)
                   </Button>
+                </div>
+              )}
+
+              {listing.status !== 'active' && (
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                  <p className="text-sm text-gray-600">
+                    This listing is currently {listing.status} and not available for purchase.
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -332,6 +397,10 @@ export default function ListingPage() {
                 <span>{new Date(listing.updated_at).toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-600">Duration:</span>
+                <span>{listing.duration_days} days</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Status:</span>
                 <Badge variant={listing.is_active ? "default" : "secondary"}>
                   {listing.is_active ? "Active" : "Inactive"}
@@ -340,6 +409,10 @@ export default function ListingPage() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Type:</span>
                 <span className="capitalize">{listing.listing_type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Vendor Type:</span>
+                <span className="capitalize">{listing.vendor.vendor_type}</span>
               </div>
             </CardContent>
           </Card>

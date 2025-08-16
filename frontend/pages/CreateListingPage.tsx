@@ -22,9 +22,10 @@ export default function CreateListingPage() {
     price: '',
     currency: 'BIF',
     category_id: '',
-    shop_id: '',
+    vendor_id: '',
     listing_type: 'offering' as 'offering' | 'wanted',
     contact_hidden: false,
+    duration_days: '30',
     images: [] as string[]
   });
 
@@ -33,9 +34,9 @@ export default function CreateListingPage() {
     queryFn: () => backend.listing.listCategories()
   });
 
-  const { data: shops } = useQuery({
-    queryKey: ['shops'],
-    queryFn: () => backend.listing.listShops({})
+  const { data: vendors } = useQuery({
+    queryKey: ['vendors'],
+    queryFn: () => backend.vendor.listVendors({})
   });
 
   const createMutation = useMutation({
@@ -46,9 +47,10 @@ export default function CreateListingPage() {
         price: parseInt(formData.price),
         currency: formData.currency,
         category_id: formData.category_id ? parseInt(formData.category_id) : undefined,
-        shop_id: parseInt(formData.shop_id),
+        vendor_id: parseInt(formData.vendor_id),
         listing_type: formData.listing_type,
         contact_hidden: formData.contact_hidden,
+        duration_days: parseInt(formData.duration_days),
         images: formData.images.length > 0 ? formData.images : undefined
       };
       
@@ -74,7 +76,7 @@ export default function CreateListingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.shop_id || !formData.price) {
+    if (!formData.title || !formData.vendor_id || !formData.price) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields.",
@@ -87,7 +89,6 @@ export default function CreateListingPage() {
   };
 
   const handleImageAdd = () => {
-    // In a real app, this would open a file picker or image upload dialog
     const imageUrl = prompt('Enter image URL:');
     if (imageUrl) {
       setFormData(prev => ({
@@ -144,6 +145,27 @@ export default function CreateListingPage() {
                 </Select>
               </div>
 
+              {/* Vendor */}
+              <div className="space-y-2">
+                <Label>Vendor *</Label>
+                <Select 
+                  value={formData.vendor_id} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, vendor_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select vendor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vendors?.vendors.map((vendor) => (
+                      <SelectItem key={vendor.id} value={vendor.id.toString()}>
+                        {vendor.name} ({vendor.vendor_type})
+                        {vendor.gallery_name && ` - ${vendor.gallery_name}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
@@ -168,9 +190,9 @@ export default function CreateListingPage() {
                 />
               </div>
 
-              {/* Price */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2 space-y-2">
+              {/* Price and Duration */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="price">
                     {formData.listing_type === 'wanted' ? 'Budget' : 'Price'} *
                   </Label>
@@ -184,21 +206,33 @@ export default function CreateListingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select 
-                    value={formData.currency} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BIF">BIF</SelectItem>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="duration">Duration (days)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    value={formData.duration_days}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration_days: e.target.value }))}
+                    placeholder="30"
+                  />
                 </div>
+              </div>
+
+              {/* Currency */}
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select 
+                  value={formData.currency} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BIF">BIF</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Category */}
@@ -215,26 +249,6 @@ export default function CreateListingPage() {
                     {categories?.categories.map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
                         {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Shop */}
-              <div className="space-y-2">
-                <Label>Shop *</Label>
-                <Select 
-                  value={formData.shop_id} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, shop_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your shop" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {shops?.shops.map((shop) => (
-                      <SelectItem key={shop.id} value={shop.id.toString()}>
-                        {shop.name} (#{shop.shop_number})
                       </SelectItem>
                     ))}
                   </SelectContent>

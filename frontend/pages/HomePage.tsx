@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Grid3X3, TrendingUp, Heart, Plus } from 'lucide-react';
+import { Search, MapPin, Grid3X3, TrendingUp, Heart, Plus, Store, Truck } from 'lucide-react';
 import backend from '~backend/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,23 +9,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ListingCard from '../components/ListingCard';
 import CategoryGrid from '../components/CategoryGrid';
-import GalleryMap from '../components/GalleryMap';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [view, setView] = useState<'offerings' | 'wanted' | 'galleries' | 'categories'>('offerings');
+  const [vendorType, setVendorType] = useState<'gallery' | 'outside' | null>(null);
+  const [view, setView] = useState<'offerings' | 'wanted' | 'categories'>('offerings');
 
   const { data: listings, isLoading: loadingListings } = useQuery({
-    queryKey: ['listings', searchQuery, selectedCategory, view],
+    queryKey: ['listings', searchQuery, selectedCategory, vendorType, view],
     queryFn: async () => {
-      if (view === 'galleries' || view === 'categories') return { listings: [], total: 0 };
+      if (view === 'categories') return { listings: [], total: 0 };
       
       const listingType = view === 'wanted' ? 'wanted' : 'offering';
       const response = await backend.listing.listListings({
         search: searchQuery || undefined,
         category_id: selectedCategory || undefined,
+        vendor_type: vendorType || undefined,
         listing_type: listingType,
+        status: 'active',
         limit: 20
       });
       return response;
@@ -35,11 +37,6 @@ export default function HomePage() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => backend.listing.listCategories()
-  });
-
-  const { data: galleries } = useQuery({
-    queryKey: ['galleries'],
-    queryFn: () => backend.listing.listGalleries()
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -81,7 +78,7 @@ export default function HomePage() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search products, services, or shops..."
+                placeholder="Search products, services, or vendors..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -118,15 +115,38 @@ export default function HomePage() {
           <Grid3X3 className="h-4 w-4" />
           Categories
         </Button>
-        <Button
-          variant={view === 'galleries' ? 'default' : 'outline'}
-          onClick={() => setView('galleries')}
-          className="flex items-center gap-2"
-        >
-          <MapPin className="h-4 w-4" />
-          Galleries
-        </Button>
       </div>
+
+      {/* Vendor Type Filter */}
+      {(view === 'offerings' || view === 'wanted') && (
+        <div className="flex gap-2 justify-center">
+          <Button
+            variant={vendorType === null ? 'default' : 'outline'}
+            onClick={() => setVendorType(null)}
+            size="sm"
+          >
+            All Vendors
+          </Button>
+          <Button
+            variant={vendorType === 'gallery' ? 'default' : 'outline'}
+            onClick={() => setVendorType('gallery')}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Store className="h-3 w-3" />
+            Gallery Vendors
+          </Button>
+          <Button
+            variant={vendorType === 'outside' ? 'default' : 'outline'}
+            onClick={() => setVendorType('outside')}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Truck className="h-3 w-3" />
+            Delivery Vendors
+          </Button>
+        </div>
+      )}
 
       {/* Category Filter */}
       {(view === 'offerings' || view === 'wanted') && categories && (
@@ -198,10 +218,23 @@ export default function HomePage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {listings?.listings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  {listings?.total} {view} found
+                </h2>
+                {vendorType && (
+                  <Badge variant="secondary" className="capitalize">
+                    {vendorType} Vendors Only
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {listings?.listings.map((listing) => (
+                  <ListingCard key={listing.id} listing={listing} />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -217,33 +250,18 @@ export default function HomePage() {
         />
       )}
 
-      {view === 'galleries' && galleries && (
-        <div className="space-y-6">
-          <GalleryMap galleries={galleries.galleries} />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {galleries.galleries.map((gallery) => (
-              <Link key={gallery.id} to={`/gallery/${gallery.id}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      {gallery.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Badge variant="secondary">{gallery.zone}</Badge>
-                      {gallery.description && (
-                        <p className="text-sm text-gray-600">{gallery.description}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Info Section */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="text-blue-800">How NzimApp Works</CardTitle>
+        </CardHeader>
+        <CardContent className="text-blue-700 space-y-2">
+          <p><strong>Gallery Vendors:</strong> Physical shops in galleries - reserve items for pickup</p>
+          <p><strong>Outside Vendors:</strong> Independent sellers offering delivery services</p>
+          <p><strong>Share & Earn:</strong> Share listings and earn gift points from successful sales</p>
+          <p><strong>Wanted Listings:</strong> Post what you're looking for and let vendors find you</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
