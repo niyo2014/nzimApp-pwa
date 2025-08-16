@@ -118,8 +118,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
           
           <div className="text-sm text-gray-600">
-            <span className="font-medium">Vendor:</span> {listing.vendor.name}
-            {listing.vendor.trust_score > 0 && (
+            <span className="font-medium">Vendor:</span> {listing.vendor?.name || 'Unknown Vendor'}
+            {listing.vendor?.trust_score > 0 && (
               <span className="ml-2 text-xs">
                 (Trust Score: {listing.vendor.trust_score})
               </span>

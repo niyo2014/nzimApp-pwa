@@ -23,7 +23,7 @@ export const getAnalytics = api<void, AnalyticsResponse>(
   async () => {
     // Get total counts
     const totalUsers = await adminDB.queryRow<{ count: number }>`
-      SELECT COUNT(*) as count FROM users
+      SELECT COUNT(*) as count FROM vendors
     `;
 
     const totalListings = await adminDB.queryRow<{ count: number }>`
@@ -35,18 +35,18 @@ export const getAnalytics = api<void, AnalyticsResponse>(
     `;
 
     const totalSales = await adminDB.queryRow<{ count: number }>`
-      SELECT COUNT(*) as count FROM sales
+      SELECT COUNT(*) as count FROM transactions WHERE status = 'completed'
     `;
 
     const totalClicks = await adminDB.queryRow<{ total_clicks: number }>`
-      SELECT COALESCE(SUM(clicks), 0) as total_clicks FROM referrals
+      SELECT COALESCE(COUNT(*), 0) as total_clicks FROM referrals WHERE click_timestamp IS NOT NULL
     `;
 
-    // Get users by type
-    const usersByType = await adminDB.queryAll<{ user_type: string; count: number }>`
-      SELECT user_type, COUNT(*) as count 
-      FROM users 
-      GROUP BY user_type
+    // Get users by type (using vendors table)
+    const usersByType = await adminDB.queryAll<{ vendor_type: string; count: number }>`
+      SELECT vendor_type, COUNT(*) as count 
+      FROM vendors 
+      GROUP BY vendor_type
     `;
 
     // Get listings by category
@@ -60,7 +60,7 @@ export const getAnalytics = api<void, AnalyticsResponse>(
     // Get today's activity
     const newUsersToday = await adminDB.queryRow<{ count: number }>`
       SELECT COUNT(*) as count 
-      FROM users 
+      FROM vendors 
       WHERE DATE(created_at) = CURRENT_DATE
     `;
 
@@ -72,8 +72,8 @@ export const getAnalytics = api<void, AnalyticsResponse>(
 
     const salesToday = await adminDB.queryRow<{ count: number }>`
       SELECT COUNT(*) as count 
-      FROM sales 
-      WHERE DATE(created_at) = CURRENT_DATE
+      FROM transactions 
+      WHERE DATE(created_at) = CURRENT_DATE AND status = 'completed'
     `;
 
     const conversionRate = totalClicks?.total_clicks > 0 
@@ -88,7 +88,7 @@ export const getAnalytics = api<void, AnalyticsResponse>(
       total_clicks: totalClicks?.total_clicks || 0,
       conversion_rate: conversionRate,
       users_by_type: usersByType.reduce((acc, item) => {
-        acc[item.user_type] = item.count;
+        acc[item.vendor_type] = item.count;
         return acc;
       }, {} as Record<string, number>),
       listings_by_category: listingsByCategory.reduce((acc, item) => {

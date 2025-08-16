@@ -11,8 +11,8 @@ export const trackClick = api<TrackClickRequest, void>(
   async (req) => {
     await referralDB.exec`
       UPDATE referrals 
-      SET clicks = clicks + 1 
-      WHERE referral_code = ${req.referral_code}
+      SET click_timestamp = CURRENT_TIMESTAMP
+      WHERE referral_id = ${req.referral_code} AND click_timestamp IS NULL
     `;
   }
 );

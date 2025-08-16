@@ -18,15 +18,32 @@ export const createReferral = api<CreateReferralRequest, CreateReferralResponse>
   async (req) => {
     const referralCode = generateReferralCode();
     
+    // First, check if sharer exists, if not create them
+    let sharer = await referralDB.queryRow<{ id: number }>`
+      SELECT id FROM sharers WHERE contact_number = ${req.sharer_phone}
+    `;
+    
+    if (!sharer) {
+      sharer = await referralDB.queryRow<{ id: number }>`
+        INSERT INTO sharers (name, contact_number)
+        VALUES (${req.sharer_name}, ${req.sharer_phone})
+        RETURNING id
+      `;
+    }
+    
+    if (!sharer) {
+      throw new Error("Failed to create or find sharer");
+    }
+    
     await referralDB.exec`
-      INSERT INTO referrals (listing_id, sharer_name, sharer_phone, referral_code, gifts_points_earned)
-      VALUES (${req.listing_id}, ${req.sharer_name}, ${req.sharer_phone}, ${referralCode}, 100)
+      INSERT INTO referrals (referral_id, sharer_id, listing_id, points_earned)
+      VALUES (${referralCode}, ${sharer.id}, ${req.listing_id}, 100)
     `;
     
     const listing = await referralDB.queryRow<any>`
-      SELECT l.title, s.whatsapp, s.phone, s.name as shop_name
+      SELECT l.title, v.contact_number, v.name as vendor_name
       FROM listings l
-      JOIN shops s ON l.shop_id = s.id
+      JOIN vendors v ON l.vendor_id = v.id
       WHERE l.id = ${req.listing_id}
     `;
     
@@ -35,8 +52,8 @@ export const createReferral = api<CreateReferralRequest, CreateReferralResponse>
       : 'http://localhost:3000';
     
     const referralUrl = `${baseUrl}/listing/${req.listing_id}?ref=${referralCode}`;
-    const whatsappNumber = listing?.whatsapp || listing?.phone;
-    const message = `Murakoze! Check out this great offer: ${listing?.title} from ${listing?.shop_name}. ${referralUrl}`;
+    const whatsappNumber = listing?.contact_number;
+    const message = `Murakoze! Check out this great offer: ${listing?.title} from ${listing?.vendor_name}. ${referralUrl}`;
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
     return {

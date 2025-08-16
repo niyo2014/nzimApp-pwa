@@ -118,7 +118,7 @@ export default function SharePage() {
             <div className="p-4 bg-gray-50 rounded-lg">
               <h4 className="font-semibold mb-2">Listing: {listing.title}</h4>
               <p className="text-sm text-gray-600 mb-2">Price: {listing.price.toLocaleString()} {listing.currency}</p>
-              <p className="text-sm text-gray-600">Shop: {listing.shop.name}</p>
+              <p className="text-sm text-gray-600">Vendor: {listing.vendor?.name || 'Unknown Vendor'}</p>
             </div>
           </CardContent>
         </Card>
