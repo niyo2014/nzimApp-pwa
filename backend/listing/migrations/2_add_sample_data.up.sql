@@ -1,7 +1,7 @@
 -- Insert sample vendors
 INSERT INTO vendors (name, contact_number, email, vendor_type, kyc_status, status, trust_score) VALUES
 ('Jean Baptiste Electronics', '+25779111001', 'jean@example.com', 'gallery', 'verified', 'active', 85),
-('Marie Claire Fashion', '+25779111002', 'marie@example.com', 'gallery', 'verified', 'active', 92),
+('Marie Claire Fashion', '+25771048578', 'marie@example.com', 'gallery', 'verified', 'active', 92),
 ('Pierre Food Paradise', '+25779111003', 'pierre@example.com', 'gallery', 'verified', 'active', 78),
 ('Esperance Electronics', '+25779222001', 'esperance@example.com', 'gallery', 'verified', 'active', 88),
 ('Grace Beauty Hub', '+25779222002', 'grace@example.com', 'gallery', 'verified', 'active', 95),
