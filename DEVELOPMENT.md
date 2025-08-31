@@ -43,7 +43,7 @@ The backend will be available at the URL shown in your terminal (typically `http
 
 2. Install the dependencies:
    ```bash
-   npm install
+   bun install
    ```
 
 3. Start the development server:
